@@ -1,6 +1,7 @@
 {
   "name": "abi",
   "version": "1.0.0",
+  "private": true,
   "description": "Another Bright Idea",
   "type": "module",
   "repository": {
@@ -12,11 +13,24 @@
     "url": "https://github.com/yyaskriloff/abi/issues"
   },
   "homepage": "https://github.com/yyaskriloff/abi#readme",
+  "scripts": {
+    "dev": "pnpm -r --parallel --filter @abi/trpc --filter @abi/admin --filter @abi/mobile dev",
+    "dev:trpc": "pnpm --filter @abi/trpc dev",
+    "dev:admin": "pnpm --filter @abi/admin dev",
+    "dev:mobile": "pnpm --filter @abi/mobile dev",
+    "build": "pnpm -r --filter @abi/trpc --filter @abi/admin build",
+    "typecheck": "pnpm -r typecheck"
+  },
   "dependencies": {
     "railway": "^3.17.0"
   },
   "devDependencies": {
-    "@types/node": "^26.6.6",
-    "typescript": "^7.0.2"
-  }
+    "@types/node": "^22.15.0",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=9"
+  },
+  "packageManager": "pnpm@11.22.0"
 }

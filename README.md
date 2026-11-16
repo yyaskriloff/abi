@@ -189,3 +189,75 @@ practical help, information, and human support easier to reach.
 This is not about replacing the people and organizations already serving
 families. It is about helping them work together so that the combined
 strength of the community can be there for every family that needs it.
+
+------------------------------------------------------------------------
+
+## Development
+
+Flat pnpm workspace with three packages that share tRPC types:
+
+| Package | Path | Role |
+| --- | --- | --- |
+| `@abi/trpc` | `trpc/` | Hono + tRPC server; exports `AppRouter` |
+| `@abi/admin` | `admin/` | Vite + React admin SPA |
+| `@abi/mobile` | `mobile/` | Expo mobile app |
+
+### Setup
+
+```bash
+pnpm install
+```
+
+### Run locally
+
+```bash
+# API only (http://localhost:3001)
+pnpm dev:trpc
+
+# Admin SPA (http://localhost:5173) — needs the API running
+pnpm dev:admin
+
+# Expo
+pnpm dev:mobile
+```
+
+Copy env examples if needed:
+
+- `admin/.env.example` → `admin/.env` (`VITE_API_URL`)
+- `mobile/.env.example` → `mobile/.env` (`EXPO_PUBLIC_API_URL`)
+
+On a physical device, set the API URL to your machine’s LAN IP instead of
+`localhost`.
+
+Admin and mobile import types only:
+
+```ts
+import type { AppRouter } from "@abi/trpc";
+```
+
+### Railway
+
+Infrastructure lives in [`.railway/railway.ts`](.railway/railway.ts):
+
+| Service | What it deploys |
+| --- | --- |
+| `api` | `@abi/trpc` (Hono + tRPC) |
+| `admin` | Vite static build (`admin/dist`) |
+
+`mobile` is Expo and is not deployed on Railway (use EAS when you ship).
+
+```bash
+railway config plan
+railway config apply   # only after reviewing the plan
+railway domain --service api
+railway domain --service admin
+```
+
+`admin` builds with `VITE_API_URL=https://${{api.RAILWAY_PUBLIC_DOMAIN}}`, so generate the `api` domain before (or right after) the first admin deploy.
+
+Development environment URLs (current):
+
+- API: https://api-development-d94668f5.up.railway.app
+- Admin: https://admin-development-ec80c4e1.up.railway.app
+
+GitHub auto-deploys will only succeed after the monorepo (`pnpm-lock.yaml`, `admin/`, `trpc/`, `mobile/`) is pushed to `main`. Until then, deploy from local with `railway up --service api` / `railway up --service admin`.

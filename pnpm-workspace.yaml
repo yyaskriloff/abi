@@ -1,0 +1,7 @@
+packages:
+  - admin
+  - trpc
+  - mobile
+
+allowBuilds:
+  esbuild: true

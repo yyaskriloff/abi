@@ -1,0 +1,63 @@
+:root {
+  color-scheme: light;
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+  line-height: 1.5;
+  color: #1c1917;
+  background:
+    radial-gradient(circle at top left, #fef3c7 0%, transparent 40%),
+    radial-gradient(circle at bottom right, #dbeafe 0%, transparent 45%),
+    #fafaf9;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+.page {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+h1 {
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+  font-size: clamp(2.25rem, 4vw, 3rem);
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+}
+
+.lede {
+  margin: 0 0 2rem;
+  color: #57534e;
+}
+
+section {
+  margin-bottom: 1.75rem;
+}
+
+h2 {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #78716c;
+  margin: 0 0 0.5rem;
+}
+
+pre {
+  margin: 0;
+  padding: 1rem;
+  overflow: auto;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid #e7e5e4;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.error {
+  color: #b91c1c;
+}
