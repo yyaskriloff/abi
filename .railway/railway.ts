@@ -1,10 +1,22 @@
-import { defineRailway, github, group, project, service } from "railway/iac";
+import {
+  bucket,
+  defineRailway,
+  github,
+  group,
+  postgres,
+  project,
+  ref,
+  service,
+} from "railway/iac";
 
 export default defineRailway(() => {
   const repo = github("yyaskriloff/abi");
 
+  const blob = bucket("blob-store", { region: "iad" });
+  const db = postgres("database");
+
   // Shared monorepo: keep repo root so pnpm workspaces resolve (@abi/trpc).
-  const api = service("api", {
+  const trpc = service("trpc", {
     source: repo,
     build: {
       buildCommand:
@@ -20,6 +32,12 @@ export default defineRailway(() => {
     healthcheck: "/",
     env: {
       NODE_ENV: "production",
+      DATABASE_URL: db.env.DATABASE_URL,
+      BUCKET: ref(blob, "BUCKET"),
+      ACCESS_KEY_ID: ref(blob, "ACCESS_KEY_ID"),
+      SECRET_ACCESS_KEY: ref(blob, "SECRET_ACCESS_KEY"),
+      ENDPOINT: ref(blob, "ENDPOINT"),
+      REGION: ref(blob, "REGION"),
     },
   });
 
@@ -37,13 +55,13 @@ export default defineRailway(() => {
       ],
     },
     env: {
-      // Browser-facing API URL; Railway interpolates after the api domain exists.
-      VITE_API_URL: "https://${{api.RAILWAY_PUBLIC_DOMAIN}}",
+      // Browser-facing API URL; Railway interpolates after the trpc domain exists.
+      VITE_API_URL: "https://${{trpc.RAILWAY_PUBLIC_DOMAIN}}",
       RAILPACK_SPA_OUTPUT_DIR: "admin/dist",
     },
   });
 
   return project("another-bright-idea", {
-    resources: [group("Apps", [api, admin])],
+    resources: [group("Apps", [trpc, admin]), group("Data", [db, blob])],
   });
 });
