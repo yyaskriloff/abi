@@ -1,0 +1,22 @@
+{
+  "name": "abi",
+  "version": "1.0.0",
+  "description": "Another Bright Idea",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yyaskriloff/abi.git"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yyaskriloff/abi/issues"
+  },
+  "homepage": "https://github.com/yyaskriloff/abi#readme",
+  "dependencies": {
+    "railway": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2"
+  }
+}
