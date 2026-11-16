@@ -7,20 +7,27 @@ import {
   project,
   ref,
   service,
+  volume,
 } from "railway/iac";
 
 export default defineRailway(() => {
-  const repo = github("yyaskriloff/abi");
+  const database = postgres("database", { region: "us-east4-eqdc4a" });
+  const databaseVolume = volume("database-volume", {
+    alerts: { usage: { "100": {}, "80": {}, "95": {} } },
+    allowOnlineResize: true,
+    region: "us-east4-eqdc4a",
+    sizeMB: 5000,
+  });
 
-  const blob = bucket("blob-store", { region: "iad" });
-  const db = postgres("database");
+  const blobStore = bucket("blob-store", { region: "iad" });
 
-  // Shared monorepo: keep repo root so pnpm workspaces resolve (@abi/trpc).
   const trpc = service("trpc", {
-    source: repo,
+    source: github("yyaskriloff/abi", { branch: "main", checkSuites: false }),
     build: {
       buildCommand:
         "corepack enable && pnpm install --frozen-lockfile && pnpm --filter @abi/trpc build",
+      buildEnvironment: "V3",
+      builder: "RAILPACK",
       watchPatterns: [
         "trpc/**",
         "package.json",
@@ -30,22 +37,28 @@ export default defineRailway(() => {
     },
     start: "corepack enable && pnpm --filter @abi/trpc start",
     healthcheck: "/",
+    replicas: { "us-east4-eqdc4a": 1 },
+    deploy: {
+      limitOverride: { containers: { cpu: 0.5, memoryBytes: 500000000 } },
+    },
     env: {
       NODE_ENV: "production",
-      DATABASE_URL: db.env.DATABASE_URL,
-      BUCKET: ref(blob, "BUCKET"),
-      ACCESS_KEY_ID: ref(blob, "ACCESS_KEY_ID"),
-      SECRET_ACCESS_KEY: ref(blob, "SECRET_ACCESS_KEY"),
-      ENDPOINT: ref(blob, "ENDPOINT"),
-      REGION: ref(blob, "REGION"),
+      DATABASE_URL: database.env.DATABASE_URL,
+      BUCKET: ref(blobStore, "BUCKET"),
+      ACCESS_KEY_ID: ref(blobStore, "ACCESS_KEY_ID"),
+      SECRET_ACCESS_KEY: ref(blobStore, "SECRET_ACCESS_KEY"),
+      ENDPOINT: ref(blobStore, "ENDPOINT"),
+      REGION: ref(blobStore, "REGION"),
     },
   });
 
   const admin = service("admin", {
-    source: repo,
+    source: github("yyaskriloff/abi", { branch: "main" }),
     build: {
       buildCommand:
         "corepack enable && pnpm install --frozen-lockfile && pnpm --filter @abi/admin build",
+      buildEnvironment: "V3",
+      builder: "RAILPACK",
       watchPatterns: [
         "admin/**",
         "trpc/**",
@@ -54,14 +67,20 @@ export default defineRailway(() => {
         "pnpm-workspace.yaml",
       ],
     },
+    replicas: { "us-east4-eqdc4a": 1 },
+    deploy: {
+      limitOverride: { containers: { cpu: 0.5, memoryBytes: 500000000 } },
+    },
     env: {
       // Browser-facing API URL; Railway interpolates after the trpc domain exists.
       VITE_API_URL: "https://${{trpc.RAILWAY_PUBLIC_DOMAIN}}",
       RAILPACK_SPA_OUTPUT_DIR: "admin/dist",
     },
   });
+  const Apps = group("Apps", [trpc, admin]);
+  const Data = group("Data", [database, blobStore]);
 
   return project("another-bright-idea", {
-    resources: [group("Apps", [trpc, admin]), group("Data", [db, blob])],
+    resources: [databaseVolume, Apps, Data],
   });
 });
