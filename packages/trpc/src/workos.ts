@@ -1,20 +1,21 @@
 import { WorkOS } from "@workos-inc/node";
 
-const apiKey = process.env.WORKOS_API_KEY;
-const clientId = process.env.WORKOS_CLIENT_ID;
+let client: WorkOS | null | undefined;
 
-if (!apiKey) {
-  console.warn(
-    "[@abi/trpc] WORKOS_API_KEY is not set; protected routes will reject all requests",
-  );
+export function getWorkos(): WorkOS | null {
+  if (client !== undefined) return client;
+
+  const apiKey = process.env.WORKOS_API_KEY;
+  const workosClientId = process.env.WORKOS_CLIENT_ID;
+
+  if (!apiKey || !workosClientId) {
+    console.warn(
+      "[@abi/trpc] WORKOS_API_KEY / WORKOS_CLIENT_ID not set; protected routes will reject authenticated requests",
+    );
+    client = null;
+    return client;
+  }
+
+  client = new WorkOS(apiKey, { clientId: workosClientId });
+  return client;
 }
-
-if (!clientId) {
-  console.warn(
-    "[@abi/trpc] WORKOS_CLIENT_ID is not set; access token verification will fail",
-  );
-}
-
-export const workos = new WorkOS(apiKey ?? "missing", {
-  clientId: clientId ?? "missing",
-});

@@ -14,10 +14,10 @@ export const appRouter = router({
   me: protectedProcedure.query(({ ctx }) => ({
     sub: ctx.session.sub,
     sid: ctx.session.sid,
-    orgId: ctx.session.org_id ?? null,
-    role: ctx.session.role ?? null,
-    roles: ctx.session.roles ?? null,
-    permissions: ctx.session.permissions ?? [],
+    orgId: ctx.session.org_id,
+    role: ctx.session.role,
+    roles: ctx.session.roles,
+    permissions: ctx.session.permissions,
   })),
 });
 

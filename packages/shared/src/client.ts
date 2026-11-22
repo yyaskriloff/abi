@@ -3,11 +3,24 @@ import { httpBatchLink } from "@trpc/client";
 import { trpc } from "./trpc";
 
 export type AbiTrpcClientOptions = {
-  getAccessToken?: () => Promise<string | null | undefined>;
+  getAccessToken?: () => Promise<string | null>;
 };
 
 export function createQueryClient() {
   return new QueryClient();
+}
+
+/** Wraps AuthKit (or similar) getters that throw when signed out. */
+export function toTrpcAccessTokenGetter(
+  getAccessToken: () => Promise<string>,
+): () => Promise<string | null> {
+  return async () => {
+    try {
+      return await getAccessToken();
+    } catch {
+      return null;
+    }
+  };
 }
 
 export function createAbiTrpcClient(

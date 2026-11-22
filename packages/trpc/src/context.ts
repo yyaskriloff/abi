@@ -1,11 +1,9 @@
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
 import type { AccessTokenClaims } from "@workos-inc/node";
-import { workos } from "./workos.js";
-
-export type SessionClaims = AccessTokenClaims;
+import { getWorkos } from "./workos.js";
 
 export type Context = {
-  session: SessionClaims | null;
+  session: AccessTokenClaims | null;
 };
 
 function bearerToken(req: Request): string | null {
@@ -24,11 +22,15 @@ export async function createContext(
     return { session: null };
   }
 
+  const workos = getWorkos();
+  if (!workos) {
+    return { session: null };
+  }
+
   try {
     const claims = await workos.userManagement.verifyAccessToken(token);
     return { session: claims };
-  } catch (error) {
-    console.warn("[@abi/trpc] access token verification failed", error);
+  } catch {
     return { session: null };
   }
 }

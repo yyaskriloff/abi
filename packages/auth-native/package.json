@@ -1,0 +1,31 @@
+{
+  "name": "@abi/auth-native",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "expo": "*",
+    "expo-auth-session": "*",
+    "expo-crypto": "*",
+    "expo-secure-store": "*",
+    "expo-web-browser": "*",
+    "react": "*",
+    "react-native": "*"
+  },
+  "devDependencies": {
+    "expo-auth-session": "^58.0.19",
+    "expo-crypto": "^58.0.8",
+    "expo-secure-store": "^58.0.3",
+    "expo-web-browser": "^58.1.0",
+    "typescript": "^5.8.3"
+  }
+}

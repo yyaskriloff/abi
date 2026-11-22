@@ -7,12 +7,15 @@ WebBrowser.maybeCompleteAuthSession();
 
 const ACCESS_TOKEN_KEY = "abi.workos.accessToken";
 const REFRESH_TOKEN_KEY = "abi.workos.refreshToken";
-const CODE_VERIFIER_KEY = "abi.workos.codeVerifier";
+const REFRESH_SKEW_SECONDS = 60;
 
 export type WorkOsSession = {
   accessToken: string;
   refreshToken: string | null;
 };
+
+let memorySession: WorkOsSession | null = null;
+let refreshInFlight: Promise<string | null> | null = null;
 
 function base64UrlFromBytes(bytes: Uint8Array): string {
   let binary = "";
@@ -24,6 +27,29 @@ function base64UrlFromBytes(bytes: Uint8Array): string {
 
 function base64UrlFromBase64(value: string): string {
   return value.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function accessTokenExpiresAt(accessToken: string): number | null {
+  try {
+    const payload = accessToken.split(".")[1];
+    if (!payload) return null;
+    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized.padEnd(
+      normalized.length + ((4 - (normalized.length % 4)) % 4),
+      "=",
+    );
+    const json = JSON.parse(atob(padded)) as { exp?: number };
+    return typeof json.exp === "number" ? json.exp : null;
+  } catch {
+    return null;
+  }
+}
+
+function isAccessTokenFresh(accessToken: string): boolean {
+  const exp = accessTokenExpiresAt(accessToken);
+  if (exp === null) return true;
+  const now = Math.floor(Date.now() / 1000);
+  return exp - REFRESH_SKEW_SECONDS > now;
 }
 
 async function createPkcePair() {
@@ -109,13 +135,17 @@ async function authenticateWithRefreshToken(options: {
 }
 
 export async function loadSession(): Promise<WorkOsSession | null> {
+  if (memorySession) return memorySession;
+
   const accessToken = await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
   if (!accessToken) return null;
   const refreshToken = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
-  return { accessToken, refreshToken };
+  memorySession = { accessToken, refreshToken };
+  return memorySession;
 }
 
 export async function saveSession(session: WorkOsSession): Promise<void> {
+  memorySession = session;
   await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, session.accessToken);
   if (session.refreshToken) {
     await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, session.refreshToken);
@@ -125,9 +155,10 @@ export async function saveSession(session: WorkOsSession): Promise<void> {
 }
 
 export async function clearSession(): Promise<void> {
+  memorySession = null;
+  refreshInFlight = null;
   await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
   await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
-  await SecureStore.deleteItemAsync(CODE_VERIFIER_KEY);
 }
 
 export async function signInWithWorkOs(options: {
@@ -141,7 +172,6 @@ export async function signInWithWorkOs(options: {
     }) || `${options.scheme}://callback`;
 
   const { codeVerifier, codeChallenge } = await createPkcePair();
-  await SecureStore.setItemAsync(CODE_VERIFIER_KEY, codeVerifier);
 
   const authUrl = new URL("https://api.workos.com/user_management/authorize");
   authUrl.searchParams.set("client_id", options.clientId);
@@ -165,15 +195,12 @@ export async function signInWithWorkOs(options: {
     throw new Error("WorkOS callback missing authorization code");
   }
 
-  const storedVerifier =
-    (await SecureStore.getItemAsync(CODE_VERIFIER_KEY)) ?? codeVerifier;
   const session = await authenticateWithCode({
     clientId: options.clientId,
     code,
-    codeVerifier: storedVerifier,
+    codeVerifier,
   });
 
-  await SecureStore.deleteItemAsync(CODE_VERIFIER_KEY);
   await saveSession(session);
   return session;
 }
@@ -184,18 +211,33 @@ export async function getValidAccessToken(options: {
   const session = await loadSession();
   if (!session) return null;
 
-  if (!session.refreshToken) {
+  if (isAccessTokenFresh(session.accessToken)) {
     return session.accessToken;
   }
 
-  try {
-    const refreshed = await authenticateWithRefreshToken({
-      clientId: options.clientId,
-      refreshToken: session.refreshToken,
-    });
-    await saveSession(refreshed);
-    return refreshed.accessToken;
-  } catch {
-    return session.accessToken;
+  const refreshToken = session.refreshToken;
+  if (!refreshToken) {
+    await clearSession();
+    return null;
   }
+
+  if (refreshInFlight) return refreshInFlight;
+
+  refreshInFlight = (async () => {
+    try {
+      const refreshed = await authenticateWithRefreshToken({
+        clientId: options.clientId,
+        refreshToken,
+      });
+      await saveSession(refreshed);
+      return refreshed.accessToken;
+    } catch {
+      await clearSession();
+      return null;
+    } finally {
+      refreshInFlight = null;
+    }
+  })();
+
+  return refreshInFlight;
 }

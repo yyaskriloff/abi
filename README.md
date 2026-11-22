@@ -200,6 +200,7 @@ pnpm workspace organized as `apps/*` and `packages/*`, sharing tRPC types:
 | --- | --- | --- |
 | `@abi/trpc` | `packages/trpc/` | Hono + tRPC server; exports `AppRouter` |
 | `@abi/shared` | `packages/shared/` | Shared hooks and tRPC/React Query helpers |
+| `@abi/auth-native` | `packages/auth-native/` | Expo WorkOS AuthKit PKCE helpers |
 | `@abi/ui` | `packages/ui/` | Web UI primitives (Tailwind + shadcn) |
 | `@abi/ui-native` | `packages/ui-native/` | Mobile UI foundation (NativeWind) |
 | `@abi/admin` | `apps/admin/` | Vite + React platform admin SPA |

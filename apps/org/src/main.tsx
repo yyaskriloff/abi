@@ -1,6 +1,7 @@
 import {
   createAbiTrpcClient,
   createQueryClient,
+  toTrpcAccessTokenGetter,
   trpc,
 } from "@abi/shared";
 import { AuthKitProvider, useAuth } from "@workos-inc/authkit-react";
@@ -22,13 +23,9 @@ function AuthenticatedRoot() {
   const trpcClient = useMemo(
     () =>
       createAbiTrpcClient(apiUrl, {
-        getAccessToken: async () => {
-          try {
-            return await getAccessTokenRef.current();
-          } catch {
-            return null;
-          }
-        },
+        getAccessToken: toTrpcAccessTokenGetter(() =>
+          getAccessTokenRef.current(),
+        ),
       }),
     [],
   );

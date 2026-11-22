@@ -1,4 +1,11 @@
 import {
+  clearSession,
+  getValidAccessToken,
+  loadSession,
+  signInWithWorkOs,
+  type WorkOsSession,
+} from "@abi/auth-native";
+import {
   createAbiTrpcClient,
   createQueryClient,
   trpc,
@@ -9,7 +16,7 @@ import {
 import { Text, theme, View } from "@abi/ui-native";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { StatusBar } from "expo-status-bar";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -17,13 +24,6 @@ import {
   ScrollView,
   StyleSheet,
 } from "react-native";
-import {
-  clearSession,
-  getValidAccessToken,
-  loadSession,
-  signInWithWorkOs,
-  type WorkOsSession,
-} from "./auth";
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3001";
 const workosClientId = process.env.EXPO_PUBLIC_WORKOS_CLIENT_ID ?? "";
@@ -144,8 +144,6 @@ export default function App() {
   const [authBusy, setAuthBusy] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
-  const clientIdRef = useRef(workosClientId);
-  clientIdRef.current = workosClientId;
 
   useEffect(() => {
     void loadSession()
@@ -157,8 +155,8 @@ export default function App() {
     () =>
       createAbiTrpcClient(apiUrl, {
         getAccessToken: async () => {
-          if (!clientIdRef.current) return null;
-          return getValidAccessToken({ clientId: clientIdRef.current });
+          if (!workosClientId) return null;
+          return getValidAccessToken({ clientId: workosClientId });
         },
       }),
     [],
