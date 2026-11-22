@@ -1,0 +1,48 @@
+@import "@abi/ui/globals.css";
+
+@source "./**/*.{ts,tsx}";
+@source "../../../../packages/ui/src/**/*.{ts,tsx}";
+
+.page {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+h1 {
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+  font-size: clamp(2.25rem, 4vw, 3rem);
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+}
+
+.lede {
+  margin: 0 0 2rem;
+  color: hsl(var(--muted-foreground));
+}
+
+section {
+  margin-bottom: 1.75rem;
+}
+
+h2 {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: hsl(var(--muted-foreground));
+  margin: 0 0 0.5rem;
+}
+
+pre {
+  margin: 0;
+  padding: 1rem;
+  overflow: auto;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+}
+
+.error {
+  color: hsl(var(--destructive));
+}
