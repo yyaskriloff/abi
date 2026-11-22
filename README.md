@@ -13,6 +13,10 @@ This document describes the purpose and intended impact of the
 organization. It is an expression of the vision discussed so far, not a
 technical plan or a finalized list of services.
 
+For the working **product / domain model** (entities, onboarding,
+requests vs offers, clients, and auth decisions), see
+[docs/product-model.md](docs/product-model.md).
+
 ------------------------------------------------------------------------
 
 ## The Need
