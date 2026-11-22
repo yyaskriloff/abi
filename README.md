@@ -234,10 +234,11 @@ pnpm dev:volunteer
 
 Copy env examples if needed:
 
-- `apps/admin/.env.example` → `apps/admin/.env` (`VITE_API_URL`)
-- `apps/org/.env.example` → `apps/org/.env` (`VITE_API_URL`)
-- `apps/mobile/.env.example` → `apps/mobile/.env` (`EXPO_PUBLIC_API_URL`)
-- `apps/volunteer/.env.example` → `apps/volunteer/.env` (`EXPO_PUBLIC_API_URL`)
+- `packages/trpc/.env.example` → `packages/trpc/.env` (`WORKOS_API_KEY`, `WORKOS_CLIENT_ID`)
+- `apps/admin/.env.example` → `apps/admin/.env` (`VITE_API_URL`, `VITE_WORKOS_CLIENT_ID`)
+- `apps/org/.env.example` → `apps/org/.env` (`VITE_API_URL`, `VITE_WORKOS_CLIENT_ID`)
+- `apps/mobile/.env.example` → `apps/mobile/.env` (`EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_WORKOS_CLIENT_ID`)
+- `apps/volunteer/.env.example` → `apps/volunteer/.env` (`EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_WORKOS_CLIENT_ID`)
 
 On a physical device, set the API URL to your machine’s LAN IP instead of
 `localhost`.
@@ -247,6 +248,25 @@ Clients import shared types:
 ```ts
 import type { AppRouter } from "@abi/trpc";
 ```
+
+### WorkOS AuthKit
+
+One WorkOS Staging environment (**A Bright Idea**), four AuthKit applications
+(shared user base). Sign-in is invite-only — clients expose Sign in, not public
+Sign up.
+
+| Client | AuthKit app | Client ID | Local redirect / initiate login |
+| --- | --- | --- | --- |
+| Admin SPA | `admin` (default) | `client_01M7JP147HH5966QTXRYV1TQ4P` | `http://localhost:5173` / `/login` |
+| Org SPA | `org` | `client_01M82ENCWDCY4CVBN7T18T6NG3` | `http://localhost:5174` / `/login` |
+| Mobile (user) | `user` | `client_01M82ENFNBEAGD4P6EYKH6B6HB` | `abi-user://callback` |
+| Volunteer | `volunteer` | `client_01M82ENG7YYXH377AAS92NTZ7Z` | `abi-volunteer://callback` |
+
+Server (`@abi/trpc`) verifies Bearer access tokens with `WORKOS_API_KEY` + the
+default Staging `WORKOS_CLIENT_ID` (JWKS). Copy the API key from the WorkOS
+Dashboard → Applications → admin → API keys into `packages/trpc/.env`.
+
+Protected smoke check: after signing in, each client calls `trpc.me`.
 
 ### Railway
 
