@@ -62,6 +62,8 @@ export default defineRailway(() => {
       watchPatterns: [
         "apps/admin/**",
         "packages/trpc/**",
+        "packages/ui/**",
+        "packages/shared/**",
         "package.json",
         "pnpm-lock.yaml",
         "pnpm-workspace.yaml",

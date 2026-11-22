@@ -1,5 +1,12 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { httpBatchLink } from "@trpc/client";
+import {
+  createAbiTrpcClient,
+  createQueryClient,
+  trpc,
+  useHealth,
+  useHello,
+} from "@abi/shared";
+import { Text, theme, View } from "@abi/ui-native";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import {
@@ -7,44 +14,50 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
-  Text,
-  View,
 } from "react-native";
-import { trpc } from "./src/trpc";
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3001";
 
 function HomeScreen() {
-  const health = trpc.health.useQuery();
-  const hello = trpc.hello.useQuery({ name: "mobile" });
+  const health = useHealth();
+  const hello = useHello("mobile");
 
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>ABI Mobile</Text>
-        <Text style={styles.lede}>
-          Smoke-test screen proving Expo can call the shared tRPC router.
+        <Text className="text-3xl font-semibold text-foreground">ABI Mobile</Text>
+        <Text className="mb-3 text-base text-muted">
+          Smoke-test screen proving Expo can call the shared tRPC router and use
+          NativeWind UI.
         </Text>
 
-        <Text style={styles.heading}>Health</Text>
+        <Text className="mt-2 text-xs font-semibold uppercase tracking-wide text-muted">
+          Health
+        </Text>
         {health.isLoading && <ActivityIndicator />}
         {health.error && (
-          <Text style={styles.error}>{health.error.message}</Text>
+          <Text className="text-destructive">{health.error.message}</Text>
         )}
         {health.data && (
-          <View style={styles.card}>
-            <Text style={styles.mono}>{JSON.stringify(health.data, null, 2)}</Text>
+          <View className="rounded-lg border border-border bg-card p-3">
+            <Text className="font-mono text-sm text-foreground">
+              {JSON.stringify(health.data, null, 2)}
+            </Text>
           </View>
         )}
 
-        <Text style={styles.heading}>Hello</Text>
+        <Text className="mt-2 text-xs font-semibold uppercase tracking-wide text-muted">
+          Hello
+        </Text>
         {hello.isLoading && <ActivityIndicator />}
         {hello.error && (
-          <Text style={styles.error}>{hello.error.message}</Text>
+          <Text className="text-destructive">{hello.error.message}</Text>
         )}
         {hello.data && (
-          <View style={styles.card}>
-            <Text style={styles.mono}>{JSON.stringify(hello.data, null, 2)}</Text>
+          <View className="rounded-lg border border-border bg-card p-3">
+            <Text className="font-mono text-sm text-foreground">
+              {JSON.stringify(hello.data, null, 2)}
+            </Text>
           </View>
         )}
       </ScrollView>
@@ -54,16 +67,8 @@ function HomeScreen() {
 }
 
 export default function App() {
-  const [queryClient] = useState(() => new QueryClient());
-  const [trpcClient] = useState(() =>
-    trpc.createClient({
-      links: [
-        httpBatchLink({
-          url: `${apiUrl}/trpc`,
-        }),
-      ],
-    }),
-  );
+  const [queryClient] = useState(() => createQueryClient());
+  const [trpcClient] = useState(() => createAbiTrpcClient(apiUrl));
 
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
@@ -77,43 +82,10 @@ export default function App() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: "#FAFAF9",
+    backgroundColor: theme.colors.background,
   },
   container: {
     padding: 24,
     gap: 12,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "600",
-    color: "#1C1917",
-  },
-  lede: {
-    fontSize: 16,
-    color: "#57534E",
-    marginBottom: 12,
-  },
-  heading: {
-    marginTop: 8,
-    fontSize: 13,
-    fontWeight: "600",
-    letterSpacing: 0.8,
-    textTransform: "uppercase",
-    color: "#78716C",
-  },
-  card: {
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#E7E5E4",
-    backgroundColor: "#FFFFFF",
-  },
-  mono: {
-    fontFamily: "Courier",
-    fontSize: 13,
-    color: "#1C1917",
-  },
-  error: {
-    color: "#B91C1C",
   },
 });

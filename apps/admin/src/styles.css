@@ -1,22 +1,7 @@
-:root {
-  color-scheme: light;
-  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
-  line-height: 1.5;
-  color: #1c1917;
-  background:
-    radial-gradient(circle at top left, #fef3c7 0%, transparent 40%),
-    radial-gradient(circle at bottom right, #dbeafe 0%, transparent 45%),
-    #fafaf9;
-}
+@import "@abi/ui/globals.css";
 
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  min-height: 100vh;
-}
+@source "./**/*.{ts,tsx}";
+@source "../../../../packages/ui/src/**/*.{ts,tsx}";
 
 .page {
   max-width: 42rem;
@@ -33,7 +18,7 @@ h1 {
 
 .lede {
   margin: 0 0 2rem;
-  color: #57534e;
+  color: hsl(var(--muted-foreground));
 }
 
 section {
@@ -44,7 +29,7 @@ h2 {
   font-size: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #78716c;
+  color: hsl(var(--muted-foreground));
   margin: 0 0 0.5rem;
 }
 
@@ -52,12 +37,12 @@ pre {
   margin: 0;
   padding: 1rem;
   overflow: auto;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid #e7e5e4;
-  border-radius: 0.5rem;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
   font-size: 0.9rem;
 }
 
 .error {
-  color: #b91c1c;
+  color: hsl(var(--destructive));
 }

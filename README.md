@@ -194,13 +194,18 @@ strength of the community can be there for every family that needs it.
 
 ## Development
 
-Flat pnpm workspace organized as `apps/*` and `packages/*` that share tRPC types:
+pnpm workspace organized as `apps/*` and `packages/*`, sharing tRPC types:
 
 | Package | Path | Role |
 | --- | --- | --- |
 | `@abi/trpc` | `packages/trpc/` | Hono + tRPC server; exports `AppRouter` |
-| `@abi/admin` | `apps/admin/` | Vite + React admin SPA |
-| `@abi/mobile` | `apps/mobile/` | Expo mobile app |
+| `@abi/shared` | `packages/shared/` | Shared hooks and tRPC/React Query helpers |
+| `@abi/ui` | `packages/ui/` | Web UI primitives (Tailwind + shadcn) |
+| `@abi/ui-native` | `packages/ui-native/` | Mobile UI foundation (NativeWind) |
+| `@abi/admin` | `apps/admin/` | Vite + React platform admin SPA |
+| `@abi/org` | `apps/org/` | Vite + React organization SPA |
+| `@abi/mobile` | `apps/mobile/` | Expo user app |
+| `@abi/volunteer` | `apps/volunteer/` | Expo volunteer app |
 
 ### Setup
 
@@ -217,19 +222,27 @@ pnpm dev:trpc
 # Admin SPA (http://localhost:5173) — needs the API running
 pnpm dev:admin
 
-# Expo
+# Org SPA (http://localhost:5174)
+pnpm dev:org
+
+# Expo user app
 pnpm dev:mobile
+
+# Expo volunteer app
+pnpm dev:volunteer
 ```
 
 Copy env examples if needed:
 
-- `apps/apps/admin/.env.example` → `apps/admin/.env` (`VITE_API_URL`)
-- `apps/apps/mobile/.env.example` → `apps/mobile/.env` (`EXPO_PUBLIC_API_URL`)
+- `apps/admin/.env.example` → `apps/admin/.env` (`VITE_API_URL`)
+- `apps/org/.env.example` → `apps/org/.env` (`VITE_API_URL`)
+- `apps/mobile/.env.example` → `apps/mobile/.env` (`EXPO_PUBLIC_API_URL`)
+- `apps/volunteer/.env.example` → `apps/volunteer/.env` (`EXPO_PUBLIC_API_URL`)
 
 On a physical device, set the API URL to your machine’s LAN IP instead of
 `localhost`.
 
-Admin and mobile import types only:
+Clients import shared types:
 
 ```ts
 import type { AppRouter } from "@abi/trpc";
@@ -241,23 +254,23 @@ Infrastructure lives in [`.railway/railway.ts`](.railway/railway.ts):
 
 | Service | What it deploys |
 | --- | --- |
-| `api` | `@abi/trpc` (Hono + tRPC) |
+| `trpc` | `@abi/trpc` (Hono + tRPC) |
 | `admin` | Vite static build (`apps/admin/dist`) |
 
-`mobile` is Expo and is not deployed on Railway (use EAS when you ship).
+Mobile apps are Expo and are not deployed on Railway (use EAS when you ship).
 
 ```bash
 railway config plan
 railway config apply   # only after reviewing the plan
-railway domain --service api
+railway domain --service trpc
 railway domain --service admin
 ```
 
-`admin` builds with `VITE_API_URL=https://${{api.RAILWAY_PUBLIC_DOMAIN}}`, so generate the `api` domain before (or right after) the first admin deploy.
+`admin` builds with `VITE_API_URL=https://${{trpc.RAILWAY_PUBLIC_DOMAIN}}`, so generate the `trpc` domain before (or right after) the first admin deploy.
 
 Development environment URLs (current):
 
 - API: https://api-development-d94668f5.up.railway.app
 - Admin: https://admin-development-ec80c4e1.up.railway.app
 
-GitHub auto-deploys will only succeed after the monorepo (`pnpm-lock.yaml`, `apps/admin/`, `packages/trpc/`, `apps/mobile/`) is pushed to `main`. Until then, deploy from local with `railway up --service api` / `railway up --service admin`.
+GitHub auto-deploys will only succeed after the monorepo (`pnpm-lock.yaml`, `apps/`, `packages/`) is pushed to `main`. Until then, deploy from local with `railway up --service trpc` / `railway up --service admin`.

@@ -11,17 +11,23 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@abi/shared": "workspace:*",
     "@abi/trpc": "workspace:*",
+    "@abi/ui-native": "workspace:*",
     "@tanstack/react-query": "^5.77.2",
     "@trpc/client": "^11.1.2",
     "@trpc/react-query": "^11.1.2",
     "expo": "~53.0.9",
     "expo-status-bar": "~2.2.3",
+    "nativewind": "^4.1.23",
     "react": "19.0.0",
-    "react-native": "0.79.2"
+    "react-native": "0.79.2",
+    "react-native-reanimated": "~3.17.4",
+    "react-native-safe-area-context": "5.4.0"
   },
   "devDependencies": {
     "@types/react": "~19.0.10",
+    "tailwindcss": "^3.4.17",
     "typescript": "^5.8.3"
   }
 }
