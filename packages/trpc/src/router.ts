@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { publicProcedure, router } from "./trpc.js";
+import { protectedProcedure, publicProcedure, router } from "./trpc.js";
 
 export const appRouter = router({
   hello: publicProcedure
@@ -10,6 +10,14 @@ export const appRouter = router({
   health: publicProcedure.query(() => ({
     ok: true as const,
     service: "abi-trpc",
+  })),
+  me: protectedProcedure.query(({ ctx }) => ({
+    sub: ctx.session.sub,
+    sid: ctx.session.sid,
+    orgId: ctx.session.org_id,
+    role: ctx.session.role,
+    roles: ctx.session.roles,
+    permissions: ctx.session.permissions,
   })),
 });
 

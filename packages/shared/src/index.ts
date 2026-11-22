@@ -1,3 +1,8 @@
-export { createAbiTrpcClient, createQueryClient } from "./client";
-export { useHealth, useHello } from "./hooks";
+export {
+  createAbiTrpcClient,
+  createQueryClient,
+  toTrpcAccessTokenGetter,
+  type AbiTrpcClientOptions,
+} from "./client";
+export { useHealth, useHello, useMe } from "./hooks";
 export { trpc } from "./trpc";

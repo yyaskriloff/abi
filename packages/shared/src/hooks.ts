@@ -7,3 +7,10 @@ export function useHealth() {
 export function useHello(name: string) {
   return trpc.hello.useQuery({ name });
 }
+
+export function useMe(enabled = true) {
+  return trpc.me.useQuery(undefined, {
+    enabled,
+    retry: false,
+  });
+}
