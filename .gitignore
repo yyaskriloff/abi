@@ -154,8 +154,8 @@ web-build/
 *.orig.*
 
 # Workspace build outputs
-trpc/dist/
-admin/dist/
+packages/*/dist/
+apps/*/dist/
 
 # Astro generated types
 .astro/

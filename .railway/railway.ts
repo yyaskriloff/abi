@@ -29,7 +29,7 @@ export default defineRailway(() => {
       buildEnvironment: "V3",
       builder: "RAILPACK",
       watchPatterns: [
-        "trpc/**",
+        "packages/trpc/**",
         "package.json",
         "pnpm-lock.yaml",
         "pnpm-workspace.yaml",
@@ -60,8 +60,8 @@ export default defineRailway(() => {
       buildEnvironment: "V3",
       builder: "RAILPACK",
       watchPatterns: [
-        "admin/**",
-        "trpc/**",
+        "apps/admin/**",
+        "packages/trpc/**",
         "package.json",
         "pnpm-lock.yaml",
         "pnpm-workspace.yaml",
@@ -74,7 +74,7 @@ export default defineRailway(() => {
     env: {
       // Browser-facing API URL; Railway interpolates after the trpc domain exists.
       VITE_API_URL: "https://${{trpc.RAILWAY_PUBLIC_DOMAIN}}",
-      RAILPACK_SPA_OUTPUT_DIR: "admin/dist",
+      RAILPACK_SPA_OUTPUT_DIR: "apps/admin/dist",
     },
   });
   const Apps = group("Apps", [trpc, admin]);

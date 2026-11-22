@@ -194,13 +194,13 @@ strength of the community can be there for every family that needs it.
 
 ## Development
 
-Flat pnpm workspace with three packages that share tRPC types:
+Flat pnpm workspace organized as `apps/*` and `packages/*` that share tRPC types:
 
 | Package | Path | Role |
 | --- | --- | --- |
-| `@abi/trpc` | `trpc/` | Hono + tRPC server; exports `AppRouter` |
-| `@abi/admin` | `admin/` | Vite + React admin SPA |
-| `@abi/mobile` | `mobile/` | Expo mobile app |
+| `@abi/trpc` | `packages/trpc/` | Hono + tRPC server; exports `AppRouter` |
+| `@abi/admin` | `apps/admin/` | Vite + React admin SPA |
+| `@abi/mobile` | `apps/mobile/` | Expo mobile app |
 
 ### Setup
 
@@ -223,8 +223,8 @@ pnpm dev:mobile
 
 Copy env examples if needed:
 
-- `admin/.env.example` → `admin/.env` (`VITE_API_URL`)
-- `mobile/.env.example` → `mobile/.env` (`EXPO_PUBLIC_API_URL`)
+- `apps/apps/admin/.env.example` → `apps/admin/.env` (`VITE_API_URL`)
+- `apps/apps/mobile/.env.example` → `apps/mobile/.env` (`EXPO_PUBLIC_API_URL`)
 
 On a physical device, set the API URL to your machine’s LAN IP instead of
 `localhost`.
@@ -242,7 +242,7 @@ Infrastructure lives in [`.railway/railway.ts`](.railway/railway.ts):
 | Service | What it deploys |
 | --- | --- |
 | `api` | `@abi/trpc` (Hono + tRPC) |
-| `admin` | Vite static build (`admin/dist`) |
+| `admin` | Vite static build (`apps/admin/dist`) |
 
 `mobile` is Expo and is not deployed on Railway (use EAS when you ship).
 
@@ -260,4 +260,4 @@ Development environment URLs (current):
 - API: https://api-development-d94668f5.up.railway.app
 - Admin: https://admin-development-ec80c4e1.up.railway.app
 
-GitHub auto-deploys will only succeed after the monorepo (`pnpm-lock.yaml`, `admin/`, `trpc/`, `mobile/`) is pushed to `main`. Until then, deploy from local with `railway up --service api` / `railway up --service admin`.
+GitHub auto-deploys will only succeed after the monorepo (`pnpm-lock.yaml`, `apps/admin/`, `packages/trpc/`, `apps/mobile/`) is pushed to `main`. Until then, deploy from local with `railway up --service api` / `railway up --service admin`.
